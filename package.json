@@ -10,15 +10,15 @@
   },
   "dependencies": {
     "@cyberlab/cyberconnect": "^4.2.0",
-    "ethers": "^5.5.3",
     "@mui/lab": "^5.0.0-alpha.64",
     "@mui/material": "^5.2.8",
+    "ethers": "^5.5.3",
     "etherscan-api": "^10.0.5",
     "graphology": "^0.23.2",
     "graphology-generators": "^0.11.2",
     "graphology-layout": "latest",
-    "graphology-types":"latest",
     "graphology-layout-forceatlas2": "^0.8.1",
+    "graphology-types": "latest",
     "next": "12.0.7",
     "react": "17.0.2",
     "react-dom": "17.0.2",
@@ -31,6 +31,7 @@
     "@types/react": "17.0.38",
     "eslint": "8.6.0",
     "eslint-config-next": "12.0.7",
+    "eslint-config-prettier": "^8.3.0",
     "kotatsu": "^0.22.3",
     "typescript": "4.5.4"
   }
