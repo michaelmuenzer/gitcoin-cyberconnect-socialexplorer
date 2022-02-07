@@ -4,16 +4,17 @@ import React, { FC } from "react";
 import "react-sigma-v2/lib/react-sigma-v2.css";
 import { EdgeType, NodeAddressType, GraphData } from '@/utils/graphTypes';
 
-const knownEthAddresses : Map<string, string> = require('./known_eth_exchange_addresses.json');
+import knownEthAddressesJson from './known_eth_exchange_addresses.json'
+const knownEthAddresses = objToStrMap(knownEthAddressesJson)
 
 import { SearchUserInfoResp, FollowListInfoResp, RecommendationListInfoResp } from '@/utils/cyberconnectTypes';
 import { TransactionsResp } from '@/utils/etherscanTypes';
 
 interface SigmaGraphProps {
-    searchAddress?: SearchUserInfoResp
-    followList?: FollowListInfoResp;
-    recommendationList?: RecommendationListInfoResp;
-    transactionList?: TransactionsResp;
+    searchAddress?: SearchUserInfoResp | null
+    followList?: FollowListInfoResp | null;
+    recommendationList?: RecommendationListInfoResp | null;
+    transactionList?: TransactionsResp | null;
 }
 
 export const SigmaGraph: FC<SigmaGraphProps> = ({ searchAddress, followList, recommendationList, transactionList }) => {
@@ -48,7 +49,7 @@ export const SigmaGraph: FC<SigmaGraphProps> = ({ searchAddress, followList, rec
     else return (<p>NOT AVAILABLE</p>)
 };
 
-function addFollowListToGraph(data: GraphData, searchAddress: SearchUserInfoResp, followList?: FollowListInfoResp) {
+function addFollowListToGraph(data: GraphData, searchAddress: SearchUserInfoResp, followList?: FollowListInfoResp | null) {
     followList?.followers.list.forEach(follower => {
         addNodeToGraph(data, follower.address, follower.ens, follower.avatar, NodeAddressType.PEER, "");
 
@@ -62,7 +63,7 @@ function addFollowListToGraph(data: GraphData, searchAddress: SearchUserInfoResp
     })
 }
 
-function addRecommendationListToGraph(data: GraphData, searchAddress: SearchUserInfoResp, recommendationList?: RecommendationListInfoResp) {
+function addRecommendationListToGraph(data: GraphData, searchAddress: SearchUserInfoResp, recommendationList?: RecommendationListInfoResp | null) {
     recommendationList?.list.forEach(recommendation => {
         addNodeToGraph(data, recommendation.address, recommendation.ens, recommendation.avatar, NodeAddressType.PEER, "");        
 
@@ -70,7 +71,7 @@ function addRecommendationListToGraph(data: GraphData, searchAddress: SearchUser
     })
 }
 
-function addTransactionListToGraph(data: GraphData, searchAddress?: SearchUserInfoResp, transactionList?: TransactionsResp) {
+function addTransactionListToGraph(data: GraphData, searchAddress?: SearchUserInfoResp, transactionList?: TransactionsResp | null) {
     const searchAddressString = searchAddress?.identity.address
     transactionList?.result.forEach(transaction => {
         if((transaction.from == searchAddressString) && transaction.to) {
@@ -99,10 +100,8 @@ function addNodeToGraph(data: GraphData, id: string, ens: string, avatar: string
     };
 
     // Enrich node information
-    Object.keys(knownEthAddresses).forEach((exchangeName) => {
-            const exchangeAddress = knownEthAddresses[exchangeName];
-
-            if (exchangeAddress == id) {
+    knownEthAddresses.forEach((exchangeAddress: string, exchangeName: string) => {
+        if (exchangeAddress.toUpperCase() === id.toUpperCase()) {
                 node.type = NodeAddressType.EXCHANGE;
                 node.name = exchangeName;
             }
@@ -128,3 +127,12 @@ function addEdgeToGraph(data: GraphData, from: string, to: string, type: EdgeTyp
         data.edges.push(edge)
     }
 }
+
+function objToStrMap(obj: any) {
+    let strMap = new Map();
+    for (let k of Object.keys(obj)) {
+      strMap.set(k, obj[k]);
+    }
+
+    return strMap;
+  }

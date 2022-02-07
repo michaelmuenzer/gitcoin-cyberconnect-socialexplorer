@@ -146,8 +146,7 @@ const Home: NextPage = () => {
     }
     setSearchLoading(false);
     //TODO: Error: Sigma: container has no width. Can this be fixed?
-    //TODO: GH Actions pipeline for Netifly
-    //TODO: Beautify README
+    //TODO: GH Actions pipeline for Netifly + Add domain to GH page
   };
 
   return (
