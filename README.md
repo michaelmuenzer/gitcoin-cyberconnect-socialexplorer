@@ -46,7 +46,7 @@ To learn more about the tools used in this project, take a look at the following
 - [CyberConnect Developers Documentation](https://docs.cyberconnect.me/)
 - [sigma.js](https://github.com/jacomyal/sigma.js/)
 - [React Sigma v2](https://github.com/sim51/react-sigma-v2)
-- [Netlify](https://www.netlify.com/)
+- [Vercel](https://vercel.com/)
 
 
 ## Credits
