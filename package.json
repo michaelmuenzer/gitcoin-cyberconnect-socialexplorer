@@ -12,6 +12,7 @@
     "@cyberlab/cyberconnect": "^4.2.0",
     "ethers": "^5.5.3",
     "@mui/lab": "^5.0.0-alpha.64",
+    "@mui/material": "^5.2.8",
     "etherscan-api": "^10.0.5",
     "graphology": "^0.23.2",
     "graphology-generators": "^0.11.2",
