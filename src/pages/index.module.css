@@ -1,0 +1,67 @@
+.container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 0 50px;
+}
+
+.link {
+  color: #0070f3;
+  text-decoration: underline;
+}
+
+.searchSection {
+  width: 100%;
+  max-width: 520px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.inputContainer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.isFollowed {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.error {
+  width: 100%;
+  color: rgb(160, 101, 101);
+  margin-top: 10px;
+}
+
+.listsContainer {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  flex-wrap: wrap;
+}
+
+.loadingButton {
+  margin-left: 15px;
+  height: 55px;
+}
+
+.subtitle {
+  margin: 1rem;
+  font-size: medium;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.textField {
+  flex: auto;
+  width: 100%;
+  text-align: center;
+}
