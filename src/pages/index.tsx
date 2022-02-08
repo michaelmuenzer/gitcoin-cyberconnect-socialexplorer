@@ -44,7 +44,7 @@ const Home: NextPage = () => {
   const fetchSearchAddrInfo = async (toAddr: string) => {
     const resp = await searchUserInfoQuery({
       fromAddr: address,
-      toAddr,
+      toAddr: toAddr,
       namespace: NAME_SPACE,
       network: NETWORK,
     });
@@ -139,14 +139,12 @@ const Home: NextPage = () => {
   const handleInputChange = async (value: string) => {
     setSearchInput(value);
 
-    if (isValidAddr(value) && address) {
+    if (isValidAddr(value)) {
       setSearchLoading(true);
       resetGraphRelatedInfo()
       await fetchSearchAddrInfo(value);
     }
     setSearchLoading(false);
-    //TODO: Error: Sigma: container has no width. Can this be fixed?
-    //TODO: GH Actions pipeline for Netifly + Add domain to GH page
   };
 
   return (
@@ -165,8 +163,7 @@ const Home: NextPage = () => {
               disabled={
                 searchLoading ||
                 !isValidAddr(searchInput) ||
-                !address ||
-                address === searchInput
+                !address
               }
               loading={searchLoading}
               className={styles.loadingButton}
@@ -176,8 +173,6 @@ const Home: NextPage = () => {
           </div>
           {!isValidAddr(searchInput) ? (
             <div className={styles.error}>Please enter a valid address.</div>
-          ) : address === searchInput ? (
-            <div className={styles.error}>You can’t follow yourself : )</div>
           ) : (
             <div />
           )}
@@ -186,7 +181,7 @@ const Home: NextPage = () => {
       {followListInfo && balanceInfo && (
           <div>
             <div className={styles.subtitle}>
-              Balance: <strong>{balanceInfo.result}</strong> Wei<br /><br />
+              Balance: <strong>{ (parseInt(balanceInfo.result) / 1000000000000000000) }</strong> ETH<br /><br />
               <strong>{followListInfo.followerCount}</strong>{' '}
               followers and <strong>{followListInfo.followingCount}</strong>{' '} followings on CyberConnect<br />
               <span className="legend">
@@ -195,7 +190,7 @@ const Home: NextPage = () => {
                 <span className="dot follow" ></span>&nbsp;Follow&nbsp;&nbsp;
               </span>
             </div>
-          <SigmaGraph searchAddress={searchAddrInfo} recommendationList={recommendationListInfo} followList={followListInfo} transactionList={transactionListInfo} />
+          <SigmaGraph address={address} searchAddress={searchAddrInfo} recommendationList={recommendationListInfo} followList={followListInfo} transactionList={transactionListInfo} />
         </div>
       )}
     </div>

@@ -11,23 +11,24 @@ import { SearchUserInfoResp, FollowListInfoResp, RecommendationListInfoResp } fr
 import { TransactionsResp } from '@/utils/etherscanTypes';
 
 interface SigmaGraphProps {
+    address: string,
     searchAddress?: SearchUserInfoResp | null
     followList?: FollowListInfoResp | null;
     recommendationList?: RecommendationListInfoResp | null;
     transactionList?: TransactionsResp | null;
 }
 
-export const SigmaGraph: FC<SigmaGraphProps> = ({ searchAddress, followList, recommendationList, transactionList }) => {
+export const SigmaGraph: FC<SigmaGraphProps> = ({ address, searchAddress, followList, recommendationList, transactionList }) => {
     var data = {
         "nodes": [],
         "edges": []
     }
 
     if(searchAddress) {
-        addSearchAddressToGraph(data, searchAddress);
-        addFollowListToGraph(data, searchAddress, followList);
-        addRecommendationListToGraph(data, searchAddress, recommendationList);
-        addTransactionListToGraph(data, searchAddress, transactionList);
+        addSearchAddressToGraph(data, address, searchAddress);
+        addFollowListToGraph(data, address, searchAddress, followList);
+        addRecommendationListToGraph(data, address, searchAddress, recommendationList);
+        addTransactionListToGraph(data, address, searchAddress, transactionList);
     }
       
     const isBrowser = () => typeof window !== "undefined"
@@ -49,48 +50,48 @@ export const SigmaGraph: FC<SigmaGraphProps> = ({ searchAddress, followList, rec
     else return (<p>NOT AVAILABLE</p>)
 };
 
-function addFollowListToGraph(data: GraphData, searchAddress: SearchUserInfoResp, followList?: FollowListInfoResp | null) {
+function addFollowListToGraph(data: GraphData, address: string, searchAddress: SearchUserInfoResp, followList?: FollowListInfoResp | null) {
     followList?.followers.list.forEach(follower => {
-        addNodeToGraph(data, follower.address, follower.ens, follower.avatar, NodeAddressType.PEER, "");
+        addNodeToGraph(data, address, follower.address, follower.ens, follower.avatar, NodeAddressType.PEER, "");
 
         addEdgeToGraph(data, follower.address, searchAddress.identity.address, EdgeType.FOLLOWER, "");
     })
     
     followList?.followings.list.forEach(following => {
-        addNodeToGraph(data, following.address, following.ens, following.avatar, NodeAddressType.PEER, "");        
+        addNodeToGraph(data, address, following.address, following.ens, following.avatar, NodeAddressType.PEER, "");        
 
         addEdgeToGraph(data, searchAddress.identity.address, following.address, EdgeType.FOLLOWING, "");
     })
 }
 
-function addRecommendationListToGraph(data: GraphData, searchAddress: SearchUserInfoResp, recommendationList?: RecommendationListInfoResp | null) {
+function addRecommendationListToGraph(data: GraphData, address: string, searchAddress: SearchUserInfoResp, recommendationList?: RecommendationListInfoResp | null) {
     recommendationList?.list.forEach(recommendation => {
-        addNodeToGraph(data, recommendation.address, recommendation.ens, recommendation.avatar, NodeAddressType.PEER, "");        
+        addNodeToGraph(data, address, recommendation.address, recommendation.ens, recommendation.avatar, NodeAddressType.PEER, "");        
 
         addEdgeToGraph(data, searchAddress.identity.address, recommendation.address, EdgeType.RECOMMENDATION, recommendation.recommendationReason);
     })
 }
 
-function addTransactionListToGraph(data: GraphData, searchAddress?: SearchUserInfoResp, transactionList?: TransactionsResp | null) {
+function addTransactionListToGraph(data: GraphData, address: string, searchAddress?: SearchUserInfoResp, transactionList?: TransactionsResp | null) {
     const searchAddressString = searchAddress?.identity.address
     transactionList?.result.forEach(transaction => {
         if((transaction.from == searchAddressString) && transaction.to) {
-            addNodeToGraph(data, transaction.to, "", "", NodeAddressType.PEER, "")
+            addNodeToGraph(data, address, transaction.to, "", "", NodeAddressType.PEER, "")
             addEdgeToGraph(data, searchAddressString, transaction.to, EdgeType.TRANSACTION, "")
         } else if ((transaction.to == searchAddressString) && transaction.from) {
-            addNodeToGraph(data, transaction.from, "", "", NodeAddressType.PEER, "")
+            addNodeToGraph(data, address, transaction.from, "", "", NodeAddressType.PEER, "")
             addEdgeToGraph(data, transaction.from, searchAddressString, EdgeType.TRANSACTION, "")
         }        
     })
 }
 
-function addSearchAddressToGraph(data: GraphData, searchAddress?: SearchUserInfoResp) {
+function addSearchAddressToGraph(data: GraphData, address: string, searchAddress?: SearchUserInfoResp) {
     if(searchAddress?.identity) {        
-        addNodeToGraph(data, searchAddress.identity.address, searchAddress.identity.ens, searchAddress.identity.avatar, NodeAddressType.MAIN, "");        
+        addNodeToGraph(data, address, searchAddress.identity.address, searchAddress.identity.ens, searchAddress.identity.avatar, NodeAddressType.SEARCH, "");        
     }
 }
 
-function addNodeToGraph(data: GraphData, id: string, ens: string, avatar: string, type: NodeAddressType, nodeName: string ) {
+function addNodeToGraph(data: GraphData, address: string, id: string, ens: string, avatar: string, type: NodeAddressType, nodeName: string ) {
     const node = {
         "id": id,
         "ens": ens,
@@ -100,12 +101,16 @@ function addNodeToGraph(data: GraphData, id: string, ens: string, avatar: string
     };
 
     // Enrich node information
-    knownEthAddresses.forEach((exchangeAddress: string, exchangeName: string) => {
-        if (exchangeAddress.toUpperCase() === id.toUpperCase()) {
-                node.type = NodeAddressType.EXCHANGE;
-                node.name = exchangeName;
-            }
-        })
+    if(address.toUpperCase() === id.toUpperCase()) {
+        node.type = NodeAddressType.SELF
+    } else {
+        knownEthAddresses.forEach((exchangeAddress: string, exchangeName: string) => {
+            if (exchangeAddress.toUpperCase() === id.toUpperCase()) {
+                    node.type = NodeAddressType.EXCHANGE;
+                    node.name = exchangeName;
+                }
+            })
+    }
 
     const existingNodes = data.nodes.filter(existingNode => existingNode["id"] == node["id"])
     existingNodes.length ? "" : data.nodes.push(node)

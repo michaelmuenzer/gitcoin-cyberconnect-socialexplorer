@@ -34,7 +34,7 @@ export const MyGraph: FC<MyGraphProps> = ({ data }) => {
 
     // Create all nodes
     data.nodes.forEach((node) => {
-      const nodeColor = (node.type == NodeAddressType.MAIN) ? "#00207F" : ((node.type == NodeAddressType.EXCHANGE) ? "#01579B" : "#4Fc3F7");
+      const nodeColor = (node.type == NodeAddressType.SELF) ? "#00207F" : ((node.type == NodeAddressType.SEARCH) ? "#5579C6" : ((node.type == NodeAddressType.EXCHANGE) ? "#01579B" : "#4Fc3F7"));
       graph.addNode(node.id, {
         nodeType: node.avatar ? "image" : "company",
         label: node.ens ? node.ens : (node.name ? node.name : node.id),
@@ -93,7 +93,9 @@ export const MyGraph: FC<MyGraphProps> = ({ data }) => {
         }
       },
       clickNode: ({ node }) => {
-        const newWindow = window.open("https://etherscan.io/address/" + node, '_blank');
+        const newWindow = window.open("https://app.cyberconnect.me/address/" + node, '_blank');
+        //TODO: Expand graph onClick on a node
+        //const newWindow = window.open("https://etherscan.io/address/" + node, '_blank');
         if (newWindow) {
           newWindow.focus();
         }

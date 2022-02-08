@@ -22,7 +22,8 @@ export enum EdgeType {
 }
 
 export enum NodeAddressType {
-  MAIN = 'Search Address',
-  PEER = 'Address',
+  SELF = 'Your Address',
+  SEARCH = 'Search Address',
+  PEER = 'Peer Address',
   EXCHANGE = 'Exchange',
 }
