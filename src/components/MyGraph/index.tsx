@@ -8,8 +8,6 @@ import forceAtlas2 from "graphology-layout-forceatlas2";
 import drawLabel from "@/utils/canvas-utils";
 import { drawHover } from "@/utils/canvas-utils";
 
-import getNodeProgramImage from "sigma/rendering/webgl/programs/node.image";
-
 function getMouseLayer() {
   return document.querySelector(".sigma-mouse");
 }
@@ -23,11 +21,46 @@ const NODE_SIZE = 15;
 
 export const MyGraph: FC<MyGraphProps> = ({ data }) => {
   const sigma = useSigma();
-  
+
   const registerEvents = useRegisterEvents();
   const loadGraph = useLoadGraph();
   const setSettings = useSetSettings();
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSettings({
+      hideLabelsOnMove: true,
+      labelRenderer: drawLabel,
+      nodeReducer: (node: string, data: { [key: string]: unknown }) => {
+        const graph = sigma.getGraph();
+        const newData: Attributes = { ...data, highlighted: data.highlighted || false };
+
+        if (hoveredNode) {
+          if (node === hoveredNode || (graph.neighbors(hoveredNode) as Array<string>).includes(node)) {
+            newData.highlighted = true;
+          } else {
+            newData.color = "#E2E2E2";
+            newData.highlighted = false;
+          }
+        }
+
+        return newData;
+      },
+      edgeReducer: (edge: string, data: { [key: string]: unknown }) => {
+        const graph = sigma.getGraph();
+        const newData = { ...data, hidden: false, label: "" };
+        if (hoveredNode && !(graph.extremities(edge) as Array<string>).includes(hoveredNode)) {
+          newData.hidden = true;
+          newData.label = "dsdssd";
+        }
+        return newData;
+      },
+      hoverRenderer: (context, data, settings) => {
+        sigma.setSetting("renderEdgeLabels", true)
+        drawHover(context, { ...sigma.getNodeDisplayData(data.key), ...data }, settings)
+      }
+    });
+  }, [sigma, setSettings, hoveredNode]);
 
   useEffect(() => {
     const graph = new Graph();
@@ -51,6 +84,7 @@ export const MyGraph: FC<MyGraphProps> = ({ data }) => {
         graph.addEdge(edge.from, edge.to, {
           type: "line",
           size: EDGE_SIZE,
+          label: edge.recommendationReason,
           color: "#FEC763",
         });
       } else if(edge.types.indexOf(EdgeType.TRANSACTION) >= 0) {
@@ -94,7 +128,7 @@ export const MyGraph: FC<MyGraphProps> = ({ data }) => {
       },
       clickNode: ({ node }) => {
         const newWindow = window.open("https://app.cyberconnect.me/address/" + node, '_blank');
-        //TODO: Expand graph onClick on a node
+        //TODO: Dynamically expand graph onClick of a node
         //const newWindow = window.open("https://etherscan.io/address/" + node, '_blank');
         if (newWindow) {
           newWindow.focus();
@@ -102,38 +136,6 @@ export const MyGraph: FC<MyGraphProps> = ({ data }) => {
       },
     });
   }, [sigma, registerEvents]);
-
-  useEffect(() => {
-    setSettings({
-      nodeProgramClasses: { image: getNodeProgramImage() },
-      labelRenderer: drawLabel,
-      nodeReducer: (node: string, data: { [key: string]: unknown }) => {
-        const graph = sigma.getGraph();
-        const newData: Attributes = { ...data, highlighted: data.highlighted || false };
-
-        if (hoveredNode) {
-          if (node === hoveredNode || (graph.neighbors(hoveredNode) as Array<string>).includes(node)) {
-            newData.highlighted = true;
-          } else {
-            newData.color = "#E2E2E2";
-            newData.highlighted = false;
-          }
-        }
-
-        return newData;
-      },
-      edgeReducer: (edge: string, data: { [key: string]: unknown }) => {
-        const graph = sigma.getGraph();
-        const newData = { ...data, hidden: false };
-        if (hoveredNode && !(graph.extremities(edge) as Array<string>).includes(hoveredNode)) {
-          newData.hidden = true;
-        }
-        return newData;
-      },
-      hoverRenderer: (context, data, settings) =>
-        drawHover(context, { ...sigma.getNodeDisplayData(data.key), ...data }, settings),
-    });
-  }, [sigma, setSettings, hoveredNode]);
 
   return null;
 };
